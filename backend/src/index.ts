@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
 import type { Express } from "express";
-import { itemsRouter } from "./items/controller.js";
+import { connectDB } from "./database.js";
+import { itemsRouter } from "./items/item.controller.js";
 
 
 dotenv.config();
@@ -9,8 +10,10 @@ dotenv.config();
 const app: Express = express();
 const PORT: number = 3000;
 
+connectDB();
+
 app.use(express.json());
-app.use("/api/items", itemsRouter);
+app.use("/items", itemsRouter);
 
 
 app.listen(
