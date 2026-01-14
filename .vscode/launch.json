@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Launch via NPM",
+            "request": "launch",
+            "type": "node",
+            "cwd": "${workspaceFolder}/backend",
+            "runtimeArgs": [ "run", "dev" ],
+            "runtimeExecutable": "npm",
+            "restart": true,
+            "skipFiles": [ "<node_internals>/**" ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Attach by Process ID",
+            "type": "node",
+            "request": "attach",
+            "restart": true,
+            "processId": "${command:PickProcess}",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        }
+    ]
+}
