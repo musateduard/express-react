@@ -1,10 +1,19 @@
 import { ZodError } from "zod";
-import { Types } from "mongoose";
 import { Router } from "express";
 import type { Request, Response } from "express";
+import { Types, type QueryOptions } from "mongoose";
 
-import { ShoppingItemValidator, ShoppingItemModel } from "./item.model.js";
+import { validatorSchema, ShoppingItemModel } from "./item.model.js";
 import type { ShoppingItem, ShoppingItemWrite, ShoppingItemRead } from "./item.model.js";
+
+
+type ErrorMessage = {
+    message: string;
+};
+
+type Params = {
+    id: string;
+};
 
 
 function mapToRead(source: ShoppingItem): ShoppingItemRead {
@@ -20,147 +29,162 @@ function mapToRead(source: ShoppingItem): ShoppingItemRead {
 }
 
 
-type ErrorMessage = {
-    message: string;
-};
+async function getAllItems(request: Request, response: Response<ShoppingItemRead[]>): Promise<void> {
 
-type Params = {
-    id: string;
-};
+    const queryResult: ShoppingItem[] = await ShoppingItemModel.find().lean();
+    const result: ShoppingItemRead[] = queryResult.map((item: ShoppingItem): ShoppingItemRead => mapToRead(item));
 
-const router: Router = Router();
+    response.status(200).json(result);
+    return;
+}
 
 
-router.get(
+async function getSingleItem(request: Request<Params>, response: Response<ShoppingItemRead | ErrorMessage>): Promise<void> {
 
-    "/",
+    const { id } = request.params;
 
-    async (request: Request, response: Response<ShoppingItemRead[]>): Promise<void> => {
+    // check item id
+    if (!Types.ObjectId.isValid(id)) {
 
-        const queryResult: ShoppingItem[] = await ShoppingItemModel.find().lean();
+        const message: ErrorMessage = {
+            message: `invalid item id: ${id}`
+        };
 
-        const result: ShoppingItemRead[] = queryResult.map(
-
-            (item: ShoppingItem): ShoppingItemRead => {
-                const parsedItem: ShoppingItemRead = mapToRead(item);
-                return parsedItem;
-            }
-        );
-
-        response.status(200).json(result);
+        response.status(400).json(message);
         return;
     }
-);
+
+    const queryResult: ShoppingItem | null = await ShoppingItemModel.findById(id).lean();
+
+    if (!queryResult) {
+        const message: ErrorMessage = { message: `item not found: ${id}` };
+        response.status(404).json(message);
+    }
+
+    else {
+        const result: ShoppingItemRead = mapToRead(queryResult);
+        response.status(200).json(result);
+    }
+
+    return;
+}
 
 
-router.get(
+async function createItem(request: Request, response: Response<ShoppingItemRead | ErrorMessage | string>): Promise<void> {
 
-    "/:id",
+    try {
 
-    async (request: Request<Params>, response: Response<ShoppingItemRead | ErrorMessage>): Promise<void> => {
+        const validBody: ShoppingItemWrite = validatorSchema.parse(request.body);
+        const item: ShoppingItem = await ShoppingItemModel.create(validBody);
+        const result: ShoppingItemRead = mapToRead(item);
 
-        const { id } = request.params;
+        response.status(201).json(result);
+    }
 
-        if (!Types.ObjectId.isValid(id)) {
+    catch (error) {
 
-            const message: ErrorMessage = {
-                message: `invalid item id: ${id}`
-            };
-
-            response.status(400).json(message);
-            return;
+        if (error instanceof ZodError) {
+            response.status(400).set("Content-Type", "application/json").send(error.message);
         }
 
-        const queryResult: ShoppingItem | null = await ShoppingItemModel.findById(id).lean();
+        else {
+            const message: ErrorMessage = { message: "error occured" };
+            response.status(400).json(message);
+        }
+    }
 
-        if (!queryResult) {
+    return;
+}
 
-            const message: ErrorMessage = {
-                message: `item not found: ${id}`
-            };
 
+async function updateItem(request: Request<Params>, response: Response<ShoppingItemRead | ErrorMessage | string>): Promise<void> {
+
+    const { id } = request.params;
+
+    // check item id
+    if (!Types.ObjectId.isValid(id)) {
+
+        const message: ErrorMessage = {
+            message: `invalid item id: ${id}`
+        };
+
+        response.status(400).json(message);
+        return;
+    }
+
+    try {
+
+        const options: QueryOptions<ShoppingItem> = {
+            new: true,
+            runValidators: true
+        };
+
+        const validBody: ShoppingItemWrite = validatorSchema.parse(request.body);
+        const updatedItem: ShoppingItem | null = await ShoppingItemModel.findByIdAndUpdate(id, validBody, options).lean();
+
+        if (!updatedItem) {
+            const message: ErrorMessage = { message: `item not found: ${id}` };
             response.status(404).json(message);
         }
 
         else {
-            const result: ShoppingItemRead = mapToRead(queryResult);
+            const result: ShoppingItemRead = mapToRead(updatedItem);
             response.status(200).json(result);
         }
-
-        return;
     }
-);
 
+    catch (error) {
 
-router.post(
-
-    "/",
-
-    async (request: Request, response: Response<ShoppingItemRead | ErrorMessage | string>): Promise<void> => {
-
-        try {
-
-            const validBody: ShoppingItemWrite = ShoppingItemValidator.parse(request.body);
-            const item: ShoppingItem = await ShoppingItemModel.create(validBody);
-            const result: ShoppingItemRead = mapToRead(item);
-
-            response.status(201).json(result);
+        if (error instanceof ZodError) {
+            response.status(400).set("Content-Type", "application/json").send(error.message);
         }
 
-        catch (error) {
-
-            if (error instanceof ZodError) {
-                response.status(400).set("Content-Type", "application/json").send(error.message);
-            }
-
-            else {
-
-                const message: ErrorMessage = {
-                    message: "error occured"
-                };
-
-                response.status(400).json(message);
-            }
+        else {
+            const message: ErrorMessage = { message: "error occured" };
+            response.status(400).json(message);
         }
+    }
 
+    return;
+}
+
+
+async function deleteItem(request: Request<Params>, response: Response<null | ErrorMessage>): Promise<void> {
+
+    const { id } = request.params;
+
+    // check item id
+    if (!Types.ObjectId.isValid(id)) {
+
+        const message: ErrorMessage = {
+            message: `invalid item id: ${id}`
+        };
+
+        response.status(400).json(message);
         return;
     }
-);
 
+    const queryResult: ShoppingItem | null = await ShoppingItemModel.findByIdAndDelete(id).lean();
 
-router.put(
-
-    "/:id",
-
-    async (request: Request<Params>, response: Response<ShoppingItemRead>): Promise<void> => {
-
-        console.log(`updating item ${request.params.id} ${request.body}`);
-
-        // const item: ShoppingItemRead = {
-        //     _id: 33,
-        //     name: "item1",
-        //     bought: true,
-        //     createdAt: new Date()
-        // };
-
-        // response.status(200).json(item);
-
-        return;
+    if (!queryResult) {
+        const message: ErrorMessage = { message: `item not found: ${id}` };
+        response.status(404).json(message);
     }
-);
 
-
-router.delete(
-
-    "/:id",
-
-    async (request: Request<Params>, response: Response<null>): Promise<void> => {
-
-        console.log(`deleting item ${request.params.id}`);
-
-        return;
+    else {
+        response.status(204).send();
     }
-);
 
+    return;
+}
+
+
+const router: Router = Router();
+
+router.get("/", getAllItems);
+router.get("/:id", getSingleItem);
+router.post("/", createItem);
+router.put("/:id", updateItem);
+router.delete("/:id", deleteItem);
 
 export { router as itemsRouter };

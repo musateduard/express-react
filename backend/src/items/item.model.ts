@@ -4,7 +4,6 @@ import { Schema, model, Document } from "mongoose";
 
 
 export interface ShoppingItem extends Document {
-    // _id: ObjectId;
     name: string;
     bought: boolean;
     createdAt: Date;
@@ -23,8 +22,7 @@ const validatorShape = {
 
 const schema: Schema = new Schema(definition);
 
-export const ShoppingItemValidator = z.object(validatorShape);
+export const validatorSchema = z.object(validatorShape);
 export const ShoppingItemModel: Model<ShoppingItem> = model<ShoppingItem>("ShoppingItem", schema);
-
-export type ShoppingItemWrite = z.infer<typeof ShoppingItemValidator>;
+export type ShoppingItemWrite = z.infer<typeof validatorSchema>;
 export type ShoppingItemRead = Pick<ShoppingItem, "name" | "bought" | "createdAt"> & { id: string };
