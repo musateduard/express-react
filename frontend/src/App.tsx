@@ -1,38 +1,54 @@
-import "./App.css";
-import { Fragment, useEffect, useState, type ReactElement } from "react";
-import ShoppingItem from "./components/ItemComponent";
+import type { ShoppingItem } from "./types";
+import { createItem, getItemList } from "./data";
+import ItemComponent from "./components/ItemComponent";
+
+import { Fragment, useEffect, useState } from "react";
+import type { Dispatch, Key, MouseEvent, ReactElement, SetStateAction } from "react";
+import { TextField, Button, Card } from "@mui/material";
 
 
-type ShoppingItem = {
-    name: string,
-    bought: boolean,
-    createdAt: Date
-};
+async function addItemToList(
+    itemName: string,
+    updateItemList: Dispatch<SetStateAction<ShoppingItem[]>>,
+    updateInputField: Dispatch<SetStateAction<string>>): Promise<void> {
+
+    if (!itemName) {
+        return;
+    }
+
+    const response: ShoppingItem = await createItem(itemName);
+
+    updateItemList(currentList => [...currentList, response]);
+    updateInputField(_value => "");
+
+    return;
+}
 
 
 export default function App() {
 
-    // const [count, setCount] = useState(0);
+    console.log("rendering component");
+
     const [itemList, setItemList] = useState<ShoppingItem[]>([]);
+    const [itemName, setItemName] = useState<string>("");
 
 
-    async function getItemList(controller: AbortController): Promise<void> {
+    async function fetchData(controller: AbortController): Promise<void> {
 
         try {
-
-            const url: string = "http://localhost:3000/items";
-            const options: RequestInit = {
-                signal: controller.signal
-            };
-
-            const response: Response = await fetch(url, options);
-            const data: ShoppingItem[] = await response.json();
-
+            const data: ShoppingItem[] = await getItemList(controller);
             setItemList(data);
         }
 
         catch (error) {
-            console.log(error);
+
+            if (error instanceof Error && error.name === "AbortError") {
+                console.log("fetch request aborted");
+            }
+
+            else {
+                console.warn(error);
+            }
         }
 
         return;
@@ -43,8 +59,10 @@ export default function App() {
 
         () => {
 
+            console.log("running useEffect");
+
             const controller: AbortController = new AbortController();
-            getItemList(controller);
+            fetchData(controller);
 
             const cleanup = () => {
                 controller.abort();
@@ -60,17 +78,37 @@ export default function App() {
 
     const pageSource: ReactElement = <Fragment>
 
-        <section title="input section">
+        <h1 className="page-title">Shopping List</h1>
 
-            <input name="input-form" type="text" />
+        <Card className="input-section" component="section">
 
-            <button>add</button>
+            <TextField
+                id="outlined-basic"
+                label="Item Name"
+                variant="outlined"
+                sx={{flexGrow: 1}}
+                type="text"
+                value={itemName}
+                onChange={(event) => setItemName(event.target.value)}
+            />
 
-        </section>
+            <Button
+                variant="contained"
+                sx={{textTransform: "none", flexShrink: 0}}
+                onClick={async (_event: MouseEvent) => await addItemToList(itemName, setItemList, setItemName)}>
 
-        <section>
-            <ul>{itemList.map((item) => <ShoppingItem {...item} />)}</ul>
-        </section>
+                <span className="button-icon">📝</span>
+
+                Add Item
+            </Button>
+
+        </Card>
+
+        <section className="item-list">{
+            itemList.length > 0
+            ? itemList.map((item: ShoppingItem, index: Key) => <ItemComponent data={item} key={index} updateItemList={setItemList} />)
+            : <h2>List is empty</h2>
+        }</section>
 
     </Fragment>;
 
