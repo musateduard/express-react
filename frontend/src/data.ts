@@ -1,4 +1,4 @@
-import type { ShoppingItem, ShoppingItemWrite } from "./types";
+import type { ShoppingItem, ShoppingItemCreate, ShoppingItemUpdate } from "./types";
 
 const API_URL: string = "http://localhost:3000/items";
 
@@ -18,11 +18,10 @@ export async function getItemList(controller: AbortController): Promise<Shopping
 
 export async function createItem(itemName: string): Promise<ShoppingItem> {
 
-    console.log("creating item");
+    console.log(`creating item ${itemName}`);
 
-    const body: ShoppingItemWrite = {
-        name: itemName,
-        bought: false
+    const body: ShoppingItemCreate = {
+        name: itemName
     };
 
     const options: RequestInit = {
@@ -54,10 +53,9 @@ export async function deleteItem(item: ShoppingItem): Promise<Response> {
 
 export async function updateItem(item: ShoppingItem): Promise<ShoppingItem> {
 
-    console.log(`updating item ${item.name}`);
+    console.log("sending put request");
 
-    const body: ShoppingItemWrite = {
-        name: item.name,
+    const body: ShoppingItemUpdate = {
         bought: item.bought
     };
 

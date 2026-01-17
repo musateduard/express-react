@@ -5,7 +5,10 @@ export type ShoppingItem = {
     createdAt: Date
 };
 
-export type ShoppingItemWrite = {
-    name: string,
+export type ShoppingItemCreate = {
+    name: string
+};
+
+export type ShoppingItemUpdate = {
     bought: boolean
 };

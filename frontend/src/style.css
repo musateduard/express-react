@@ -5,6 +5,8 @@
     padding: 0px;
     border: 0px;
 
+    scrollbar-gutter: stable;
+
     --standard-gap: 1rem;
 }
 
@@ -30,9 +32,6 @@ body {
     max-width: 600px;
     padding: var(--standard-gap);
     box-sizing: border-box;
-
-    /* background-color: aquamarine; */
-    /* outline: 1px green dashed; */
 }
 
 .page-title {
@@ -80,9 +79,21 @@ body {
 .item-text-section {
     display: flex;
     align-items: center;
+    min-width: 0;
+}
+
+.item-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .button-icon {
     margin-right: 0.50em;
     font-size: 1.10em;
+}
+
+.debug {
+    background-color: aquamarine;
+    outline: 1px green dashed;
+    resize: both;
 }

@@ -3,7 +3,7 @@ import { createItem, getItemList } from "./data";
 import ItemComponent from "./components/ItemComponent";
 
 import { Fragment, useEffect, useState } from "react";
-import type { Dispatch, Key, MouseEvent, ReactElement, SetStateAction } from "react";
+import type { Dispatch, FormEvent, Key, ReactElement, SetStateAction } from "react";
 import { TextField, Button, Card } from "@mui/material";
 
 
@@ -12,7 +12,7 @@ async function addItemToList(
     updateItemList: Dispatch<SetStateAction<ShoppingItem[]>>,
     updateInputField: Dispatch<SetStateAction<string>>): Promise<void> {
 
-    if (!itemName) {
+    if ( !itemName ) {
         return;
     }
 
@@ -26,8 +26,6 @@ async function addItemToList(
 
 
 export default function App() {
-
-    console.log("rendering component");
 
     const [itemList, setItemList] = useState<ShoppingItem[]>([]);
     const [itemName, setItemName] = useState<string>("");
@@ -76,11 +74,20 @@ export default function App() {
     );
 
 
+    async function submitForm(event: FormEvent): Promise<void> {
+
+        event.preventDefault();  // prevents page refresh on form submit
+        await addItemToList(itemName, setItemList, setItemName);
+
+        return;
+    }
+
+
     const pageSource: ReactElement = <Fragment>
 
         <h1 className="page-title">Shopping List</h1>
 
-        <Card className="input-section" component="section">
+        <Card component="form" className="input-section" onSubmit={submitForm}>
 
             <TextField
                 id="outlined-basic"
@@ -89,13 +96,14 @@ export default function App() {
                 sx={{flexGrow: 1}}
                 type="text"
                 value={itemName}
+                slotProps={{ htmlInput: { maxLength: 255 } }}
                 onChange={(event) => setItemName(event.target.value)}
             />
 
             <Button
+                type="submit"
                 variant="contained"
-                sx={{textTransform: "none", flexShrink: 0}}
-                onClick={async (_event: MouseEvent) => await addItemToList(itemName, setItemList, setItemName)}>
+                sx={{textTransform: "none", flexShrink: 0}}>
 
                 <span className="button-icon">📝</span>
 

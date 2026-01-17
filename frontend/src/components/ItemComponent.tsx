@@ -28,10 +28,6 @@ async function removeItemFromList(props: ItemProps): Promise<void> {
 
 async function markItemBought(props: ItemProps): Promise<void> {
 
-    // set item checkbox
-    // make put request with new status
-    // update list with response
-
     console.log("setting checkbox");
 
     const newItem: ShoppingItem = {
@@ -41,7 +37,7 @@ async function markItemBought(props: ItemProps): Promise<void> {
 
     const response: ShoppingItem = await updateItem(newItem);
 
-    // todo: finish markItemBought
+    props.updateItemList(currentList => currentList.map(item => item.id === response.id ? newItem : item));
 
     return;
 }
@@ -58,19 +54,17 @@ export default function ItemComponent(props: ItemProps): ReactElement {
                 checked={props.data.bought}
             />
 
-            <span>{props.data.name}</span>
+            <span
+                title={props.data.name}
+                className="item-text"
+                style={{textDecoration: props.data.bought === true ? "line-through" : "none"}}>
+
+                {props.data.name}
+            </span>
+
         </section>
 
         <section className="item-buttons-section">
-
-            <Button
-                sx={{textTransform: "none"}}
-                variant="contained">
-
-                <span className="button-icon">✏️</span>
-
-                Edit
-            </Button>
 
             <Button
                 sx={{textTransform: "none"}}
