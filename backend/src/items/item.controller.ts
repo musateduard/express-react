@@ -3,8 +3,8 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import { Types, type QueryOptions } from "mongoose";
 
-import { validatorSchema, ShoppingItemModel } from "./item.model.js";
-import type { ShoppingItem, ShoppingItemWrite, ShoppingItemRead } from "./item.model.js";
+import { createValidator, ShoppingItemModel, updateValidator } from "./item.model.js";
+import type { ShoppingItem, ShoppingItemCreate, ShoppingItemRead, ShoppingItemUpdate } from "./item.model.js";
 
 
 type ErrorMessage = {
@@ -56,7 +56,7 @@ async function getSingleItem(request: Request<Params>, response: Response<Shoppi
 
     const queryResult: ShoppingItem | null = await ShoppingItemModel.findById(id).lean();
 
-    if (!queryResult) {
+    if ( !queryResult ) {
         const message: ErrorMessage = { message: `item not found: ${id}` };
         response.status(404).json(message);
     }
@@ -74,7 +74,7 @@ async function createItem(request: Request, response: Response<ShoppingItemRead 
 
     try {
 
-        const validBody: ShoppingItemWrite = validatorSchema.parse(request.body);
+        const validBody: ShoppingItemCreate = createValidator.parse(request.body);
         const item: ShoppingItem = await ShoppingItemModel.create(validBody);
         const result: ShoppingItemRead = mapToRead(item);
 
@@ -101,8 +101,8 @@ async function updateItem(request: Request<Params>, response: Response<ShoppingI
 
     const { id } = request.params;
 
-    // check item id
-    if (!Types.ObjectId.isValid(id)) {
+    // validate item id
+    if ( !Types.ObjectId.isValid(id) ) {
 
         const message: ErrorMessage = {
             message: `invalid item id: ${id}`
@@ -115,14 +115,14 @@ async function updateItem(request: Request<Params>, response: Response<ShoppingI
     try {
 
         const options: QueryOptions<ShoppingItem> = {
-            new: true,
+            new: true,  // this specifies to findByIdAndUpdate() to return the newly updated object
             runValidators: true
         };
 
-        const validBody: ShoppingItemWrite = validatorSchema.parse(request.body);
+        const validBody: ShoppingItemUpdate = updateValidator.parse(request.body);
         const updatedItem: ShoppingItem | null = await ShoppingItemModel.findByIdAndUpdate(id, validBody, options).lean();
 
-        if (!updatedItem) {
+        if ( !updatedItem ) {
             const message: ErrorMessage = { message: `item not found: ${id}` };
             response.status(404).json(message);
         }
@@ -153,8 +153,8 @@ async function deleteItem(request: Request<Params>, response: Response<null | Er
 
     const { id } = request.params;
 
-    // check item id
-    if (!Types.ObjectId.isValid(id)) {
+    // validate item id
+    if ( !Types.ObjectId.isValid(id) ) {
 
         const message: ErrorMessage = {
             message: `invalid item id: ${id}`
@@ -166,7 +166,7 @@ async function deleteItem(request: Request<Params>, response: Response<null | Er
 
     const queryResult: ShoppingItem | null = await ShoppingItemModel.findByIdAndDelete(id).lean();
 
-    if (!queryResult) {
+    if ( !queryResult ) {
         const message: ErrorMessage = { message: `item not found: ${id}` };
         response.status(404).json(message);
     }
