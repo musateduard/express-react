@@ -17,11 +17,20 @@ the backend uses mongodb for data storage and the app is deployed as a self cont
 
 to run this app in dev mode you need to follow these steps:
 
-1. start a mongodb docker container that is accessible from localhost
-2. install backend dependencies
-3. run the backend app
-4. install frontend dependencies
-5. run the frontend app
+1. clone the repository
+2. start a mongodb docker container that is accessible from localhost
+3. install backend dependencies
+4. run the backend app
+5. install frontend dependencies
+6. run the frontend app
+
+
+### clone repository
+
+```bash
+git clone https://github.com/musateduard/express-react.git
+cd express-react
+```
 
 
 ### start mongodb docker container
