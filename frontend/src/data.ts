@@ -1,6 +1,6 @@
 import type { ShoppingItem, ShoppingItemCreate, ShoppingItemUpdate } from "./types";
 
-const API_URL: string = "http://localhost:3000/items";
+const API_URL: string = import.meta.env.VITE_API_URL;
 
 
 export async function getItemList(controller: AbortController): Promise<ShoppingItem[]> {
@@ -9,7 +9,7 @@ export async function getItemList(controller: AbortController): Promise<Shopping
         signal: controller.signal
     };
 
-    const response: Response = await fetch(API_URL, options);
+    const response: Response = await fetch(`${API_URL}/items`, options);
     const itemList: ShoppingItem[] = await response.json();
 
     return itemList;
@@ -30,7 +30,7 @@ export async function createItem(itemName: string): Promise<ShoppingItem> {
         headers: { "Content-Type": "application/json" }
     };
 
-    const response: Response = await fetch(API_URL, options);
+    const response: Response = await fetch(`${API_URL}/items`, options);
     const item: ShoppingItem = await response.json();
 
     return item;
@@ -45,7 +45,7 @@ export async function deleteItem(item: ShoppingItem): Promise<Response> {
         method: "DELETE",
     };
 
-    const response: Response = await fetch(`${API_URL}/${item.id}`, options);
+    const response: Response = await fetch(`${API_URL}/items/${item.id}`, options);
 
     return response;
 }
@@ -65,7 +65,7 @@ export async function updateItem(item: ShoppingItem): Promise<ShoppingItem> {
         body: JSON.stringify(body)
     };
 
-    const response: Response = await fetch(`${API_URL}/${item.id}`, options);
+    const response: Response = await fetch(`${API_URL}/items/${item.id}`, options);
     const result: ShoppingItem = await response.json();
 
     return result;
