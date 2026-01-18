@@ -1,20 +1,5 @@
 name: express-react
 
-secrets:
-
-  root-user:
-    file: ./database/secrets/root_user.txt
-
-  root-pass:
-    file: ./database/secrets/root_pass.txt
-
-  db-user:
-    file: ./database/secrets/db_user.txt
-
-  db-pass:
-    file: ./database/secrets/db_pass.txt
-
-
 volumes:
 
   express-react-db:
@@ -33,12 +18,8 @@ services:
     init: true
     volumes:
       - express-react-db:/data/db
-    secrets:
-      - root-user
-      - root-pass
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/root-user
-    #   MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/root-pass
+    environment:
+      TZ: Europe/Berlin
 
   backend:
     depends_on:
@@ -48,11 +29,23 @@ services:
     container_name: express-react-backend
     hostname: express-react-backend
     init: true
-    secrets:
-      - db-user
-      - db-pass
     environment:
+      TZ: Europe/Berlin
       DB_USER_NAME_FILE: /run/secrets/db-user
       DB_USER_PASS_FILE: /run/secrets/db-pass
     ports:
       - 3000:3000
+
+  frontend:
+    depends_on:
+      - backend
+    image: express-react-frontend
+    build: ./frontend
+    container_name: express-react-frontend
+    hostname: express-react-frontend
+    init: true
+    environment:
+      TZ: Europe/Berlin
+    ports:
+      - 80:80
+      - 443:443
