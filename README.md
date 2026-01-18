@@ -17,7 +17,7 @@ the backend uses mongodb for data storage and the app is deployed as a self cont
 
 to run this app in dev mode you need to follow these steps:
 
-1. start a mongodb instance that is accessible from localhost
+1. start a mongodb docker container that is accessible from localhost
 2. install backend dependencies
 3. run the backend app
 4. install frontend dependencies
