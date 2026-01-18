@@ -15,7 +15,22 @@ const PORT: number = 3000;
 connectDB();
 
 const corsOptions: CorsOptions = {
-    origin: "http://localhost:5173",
+
+    origin: (origin: string | undefined, callback): void => {
+
+        const originList: string[] = process.env.ALLOWED_ORIGINS?.split(",") || [];
+
+        if ( !origin || originList.includes(origin) ) {
+            callback(null, true);
+        }
+
+        else {
+            callback(new Error(`origin not allowed ${origin}`));
+        }
+
+        return;
+    },
+
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 };

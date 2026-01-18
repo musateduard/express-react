@@ -1,10 +1,11 @@
 import z from "zod";
-import type { Model } from "mongoose";
-import { Schema, model, Document } from "mongoose";
+import { Schema, model } from "mongoose";
+import type { Model, ObjectId } from "mongoose";
 
 
 // mongodb model definitions
-export interface ShoppingItem extends Document {
+export interface ShoppingItem {
+    _id: ObjectId;
     name: string;
     bought: boolean;
     createdAt: Date;
