@@ -26,12 +26,17 @@ to run this app in dev mode you need to follow these steps:
 
 ### start mongodb instance
 
+note: you need to run the mongodb container every time you run the app in dev mode
+
 ```bash
 docker run -it --rm --publish 27017:27017 --name mongodb-dev mongo:8.2.3-noble
 ```
 
 
 ### install backend app dependencies
+
+note: the backend app uses `mongoose` library for schema validation. you need to install all dependencies
+before running the app, otherwise it won't start.
 
 ```bash
 cd backend
@@ -41,18 +46,18 @@ npm install
 
 ### create backend .env file
 
-necessary data like api urls need to be stored in a .env file.
-this is for security purposes since .env files are to be accessible only at runtime and
-are not to be commited to version control.
+necessary data like api urls need to be stored in a `.env` file.
+this is for security purposes since `.env` files are to be accessible only at runtime and
+are not to be committed to version control.
 
-place the .env file in the root backend folder
+place the `.env` file in the root backend folder
 
 ```
 backend
   ∟ .env
 ```
 
-when running in dev mode you need to add the following variables to .env
+when running in dev mode you need to add the following variables to `.env`
 
 ```bash
 MONGO_URI="mongodb://localhost:27017/express_react"
@@ -69,6 +74,9 @@ ALLOWED_ORIGINS="http://localhost,http://localhost:5173"
 
 ### install frontend dependencies
 
+note: the frontend app uses `react` and `material ui` libraries. all packages need to be installed
+before running the app, otherwise it won't start.
+
 ```bash
 cd frontend
 npm install
@@ -77,14 +85,14 @@ npm install
 
 ### create frontend .env file
 
-place the .env file in the root frontend folder
+place the `.env` file in the root frontend folder
 
 ```
 frontend
   ∟ .env
 ```
 
-for both dev mode and docker compose add the following variable to the .env file
+for both dev mode and docker compose add the following variable to the `.env` file
 
 ```bash
 VITE_API_URL="http://localhost:3000"
@@ -101,7 +109,7 @@ npm run dev
 
 ### start the frontend app
 
-follow the instructions in the frontend terminal to access the app locally.
+after running the frontend app you can access it on `http://localhost:5173`
 
 ```bash
 cd frontend
@@ -124,4 +132,18 @@ sudo chmod u+x deploy_to_docker.sh
 
 ```bash
 ./deploy_to_docker.sh
+```
+
+alternately you can run the docker compose app manually without the deployment script
+
+```bash
+cd backend
+npm run build
+cd ..
+
+cd frontend
+npm run build
+cd ..
+
+docker compose up --build
 ```
