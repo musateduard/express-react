@@ -50,6 +50,9 @@ necessary data like api urls need to be stored in a `.env` file.
 this is for security purposes since `.env` files are to be accessible only at runtime and
 are not to be committed to version control.
 
+note: in a production environment the `.env` file would be provided either via docker secrets or environment variables.
+for the purposes of this showcase, adding the files manually is sufficient.
+
 place the `.env` file in the root backend folder
 
 ```
@@ -72,6 +75,14 @@ ALLOWED_ORIGINS="http://localhost,http://localhost:5173"
 ```
 
 
+### start the express js app
+
+```bash
+cd backend
+npm run dev
+```
+
+
 ### install frontend dependencies
 
 note: the frontend app uses `react` and `material ui` libraries. all packages need to be installed
@@ -87,6 +98,9 @@ npm install
 
 place the `.env` file in the root frontend folder
 
+note: in a production environment the `.env` file would be provided either via docker secrets or environment variables.
+for the purposes of this showcase, adding the files manually is sufficient.
+
 ```
 frontend
   ∟ .env
@@ -96,14 +110,6 @@ for both dev mode and docker compose add the following variable to the `.env` fi
 
 ```bash
 VITE_API_URL="http://localhost:3000"
-```
-
-
-### start the express js app
-
-```bash
-cd backend
-npm run dev
 ```
 
 
@@ -129,6 +135,10 @@ sudo chmod u+x deploy_to_docker.sh
 
 
 ### run the docker compose app
+
+note: don't forget to update the `MONGO_URI` variable in your backend `.env` file
+
+note: you can access the docker compose app at `http://localhost`
 
 ```bash
 ./deploy_to_docker.sh
