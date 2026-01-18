@@ -24,7 +24,7 @@ to run this app in dev mode you need to follow these steps:
 5. run the frontend app
 
 
-### start mongodb instance
+### start mongodb docker container
 
 note: you need to run the mongodb container every time you run the app in dev mode
 
