@@ -6,8 +6,8 @@ export async function connectDB(): Promise<void> {
     try {
 
         const url: string = `${process.env.MONGO_URI}`;
-
         const connection: Mongoose = await mongoose.connect(url);
+
         console.log("database connected successfully");
     }
 
